@@ -1,12 +1,10 @@
-from typing import Dict
+from typing import Dict, List
 
 booksDir = "books/"
 
 def main():
-    frankensteinContent = readFile("frankenstein")
-    frankensteinWordCount = countWords(frankensteinContent)
-    frankensteinCharCount = countChars(frankensteinContent)
-    print(frankensteinCharCount)
+    frankensteinBookReport = generateReport("frankenstein")
+    print(frankensteinBookReport)
 
 def readFile(book: str) -> str:
     bookFile = f"{book}.txt"
@@ -18,7 +16,8 @@ def countWords(bookContent: str) -> int:
     words = bookContent.split()
     return len(words)
 
-def countChars(bookContent: str) -> Dict[str, int]:
+def countChars(bookContent: str) -> List[Dict[str, int]]:
+    charCountList = []
     charCount = dict()
     for char in bookContent:
         lowerChar = char.lower()
@@ -26,6 +25,38 @@ def countChars(bookContent: str) -> Dict[str, int]:
             charCount[lowerChar] = 1
         else:
             charCount[lowerChar] += 1
-    return charCount
+
+    for char in charCount:
+        charCountFrequency = {"char": char, "frequency": charCount[char]}
+        charCountList.append(charCountFrequency)
+
+    charCountList.sort(reverse=True, key=sort_on)
+    return charCountList
+
+def sort_on(dict: Dict[str, int]) -> int:
+    return dict["frequency"]
+
+def generateReport(book: str) -> str:
+    bookContent = readFile(book)
+    bookWordCount = countWords(bookContent)
+    bookCharCount = countChars(bookContent)
+
+    report = ""
+    reportHeader = f"--- Begin report of {booksDir}{book}.txt ---\n"
+    report += reportHeader
+
+    reportWordCount = f"{bookWordCount} words found in the document\n"
+    report += reportWordCount
+
+    for charCount in bookCharCount:
+        char = charCount["char"]
+        charFrequency = charCount["frequency"]
+        reportCharCount = f"The '{char}' was found {charFrequency} times\n"
+        report += reportCharCount
+
+    reportFooter = "--- End report ---"
+    report += reportFooter
+
+    return report
 
 main()
